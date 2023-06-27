@@ -1,13 +1,13 @@
 import { Cliente } from '@/types/types'
 import axios from 'axios'
 
-const apiDeslocamento = 'https://api-deslocamento.herokuapp.com/api/v1/Cliente'
+const API_URL = 'https://api-deslocamento.herokuapp.com/api/v1/Cliente'
 
 export const postClient = async (
   inputValues: Partial<Cliente>,
 ): Promise<void> => {
   try {
-    const response = await axios.post<Cliente>(apiDeslocamento, inputValues, {
+    const response = await axios.post<Cliente>(API_URL, inputValues, {
       headers: {
         'Content-Type': 'application/json',
       },

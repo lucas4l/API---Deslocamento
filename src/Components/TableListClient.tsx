@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid'
-import { getClientes } from '../api/ApiGet'
-import { Cliente } from '../types/types'
-import ModalClientRegister from './ModalClientRegister'
+
 import SearchBar from './SearchBar'
-import { getClientesId } from '../api/ApiGetId'
+import ModalClientRegister from './ModalClientRegister'
+import { updateCliente } from '../api/ApiUpdate'
+import { getClientes } from '@/api/ApiGet'
+import { getClientesId } from '@/api/ApiGetId'
+
+import { Cliente } from '../types/types'
+
 import { styled } from '@mui/material/styles'
+import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid'
+import { IconButton } from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import SaveIcon from '@mui/icons-material/Save'
+import DeleteIcon from '@mui/icons-material/DeleteOutlined'
 
 const Container = styled('div')({
   display: 'flex',
@@ -13,20 +21,108 @@ const Container = styled('div')({
   marginBottom: '1rem',
 })
 
+interface RowData extends Cliente {
+  isEditMode: boolean
+}
+
 const TableListClient = () => {
-  const [rows, setRows] = useState<GridRowsProp>([])
-  const [searchId, setSearchId] = useState('')
+  const [rows, setRows] = useState<GridRowsProp<RowData>>([])
+  const [searchId, setSearchId] = useState<string>('')
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'Id', width: 10 },
-    { field: 'numeroDocumento', headerName: 'Número Documento', width: 180 },
-    { field: 'tipoDocumento', headerName: 'Tipo Documento', width: 150 },
-    { field: 'nome', headerName: 'Nome', width: 150 },
-    { field: 'logradouro', headerName: 'Logradouro', width: 150 },
-    { field: 'numero', headerName: 'Número', width: 120 },
-    { field: 'bairro', headerName: 'Bairro', width: 120 },
-    { field: 'cidade', headerName: 'Cidade', width: 120 },
-    { field: 'uf', headerName: 'UF', width: 80 },
+    { field: 'id', headerName: 'Id', width: 10, editable: false },
+    {
+      field: 'numeroDocumento',
+      headerName: 'Número Documento',
+      width: 180,
+    },
+    {
+      field: 'tipoDocumento',
+      headerName: 'Tipo Documento',
+      width: 150,
+    },
+    { field: 'nome', headerName: 'Nome', width: 150, editable: true },
+    {
+      field: 'logradouro',
+      headerName: 'Logradouro',
+      width: 150,
+      editable: true,
+    },
+    { field: 'numero', headerName: 'Número', width: 120, editable: true },
+    { field: 'bairro', headerName: 'Bairro', width: 120, editable: true },
+    { field: 'cidade', headerName: 'Cidade', width: 120, editable: true },
+    { field: 'uf', headerName: 'UF', width: 80, editable: true },
+    {
+      field: 'actions',
+      headerName: '',
+      width: 120,
+      renderCell: (params) => {
+        const rowData = params.row as RowData
+        const isEditMode = rowData.isEditMode
+
+        const handleEditClick = () => {
+          setRows((prevRows) =>
+            prevRows.map((row) =>
+              row.id === rowData.id ? { ...row, isEditMode: true } : row,
+            ),
+          )
+          console.log(rowData)
+        }
+
+        const handleSaveClick = async () => {
+          try {
+            const updatedData = {
+              id: rowData.id,
+              numeroDocumento: rowData.numeroDocumento,
+              tipoDocumento: rowData.tipoDocumento,
+              nome: rowData.nome,
+              logradouro: rowData.logradouro,
+              numero: rowData.numero,
+              bairro: rowData.bairro,
+              cidade: rowData.cidade,
+              uf: rowData.uf,
+            }
+            console.log(updatedData)
+            await updateCliente(rowData.id, updatedData)
+
+            setRows((prevRows) =>
+              prevRows.map((row) =>
+                row.id === rowData.id
+                  ? { ...row, ...updatedData, isEditMode: false }
+                  : row,
+              ),
+            )
+          } catch (error) {
+            console.error('Erro ao atualizar dados do cliente:', error)
+          }
+        }
+
+        const handleDeleteClick = (id: number) => {
+          console.log('Clique no botão Delete', id)
+        }
+
+        return (
+          <div>
+            {isEditMode ? (
+              <IconButton onClick={handleSaveClick}>
+                <SaveIcon
+                  sx={{
+                    color: 'primary.main',
+                  }}
+                />
+              </IconButton>
+            ) : (
+              <IconButton onClick={handleEditClick}>
+                <EditIcon />
+              </IconButton>
+            )}
+            <IconButton onClick={() => handleDeleteClick(rowData.id)}>
+              <DeleteIcon />
+            </IconButton>
+          </div>
+        )
+      },
+    },
   ]
 
   useEffect(() => {
@@ -34,7 +130,7 @@ const TableListClient = () => {
       try {
         const data: Cliente[] = await getClientes()
 
-        const mappedRows = data.map((item) => ({
+        const mappedRows: RowData[] = data.map((item) => ({
           id: item.id,
           numeroDocumento: item.numeroDocumento || '',
           tipoDocumento: item.tipoDocumento || '',
@@ -44,6 +140,7 @@ const TableListClient = () => {
           bairro: item.bairro || '',
           cidade: item.cidade || '',
           uf: item.uf || '',
+          isEditMode: false,
         }))
 
         setRows(mappedRows)
@@ -75,6 +172,7 @@ const TableListClient = () => {
               bairro: data.bairro || '',
               cidade: data.cidade || '',
               uf: data.uf || '',
+              isEditMode: false,
             },
           ]
         : []
