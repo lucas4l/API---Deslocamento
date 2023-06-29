@@ -1,12 +1,16 @@
 'use client'
+
+import { ReactNode } from 'react'
 import * as React from 'react'
+import Link from 'next/link'
+
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import MuiDrawer from '@mui/material/Drawer'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import List from '@mui/material/List'
-// import CssBaseline from '@mui/material/CssBaseline'
+
 import PersonIcon from '@mui/icons-material/Person'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
@@ -18,16 +22,11 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
-
-// import PersonIcon from '@mui/icons-material/Person'
 import AltRouteIcon from '@mui/icons-material/AltRoute'
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar'
 import AirlineSeatReclineNormalIcon from '@mui/icons-material/AirlineSeatReclineNormal'
-import { ReactNode } from 'react'
-
 import { Inter } from 'next/font/google'
 import { Button } from '@mui/material'
-import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -118,7 +117,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body className={inter.className}>
         <Box sx={{ display: 'flex' }} marginTop={10}>
-          {/* <CssBaseline /> */}
           <AppBar position="fixed" open={open}>
             <Toolbar>
               <IconButton
@@ -168,13 +166,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                         }}
                       >
                         {index === 0 ? (
-                          <Button>
-                            <Link href="/client">
+                          <Link href="/client">
+                            <Button>
                               <PersonIcon />
-                            </Link>
-                          </Button>
+                            </Button>
+                          </Link>
                         ) : index === 1 ? (
-                          <AirlineSeatReclineNormalIcon />
+                          <Link href="/conductor">
+                            <Button>
+                              <AirlineSeatReclineNormalIcon />
+                            </Button>
+                          </Link>
                         ) : index === 2 ? (
                           <AltRouteIcon />
                         ) : (

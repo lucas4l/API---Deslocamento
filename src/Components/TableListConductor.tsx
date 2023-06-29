@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
 
 import SearchBar from './SearchBar'
-import ModalClientRegister from './ModalClientRegister'
+import ModalConductorRegister from './ModalConductorRegister'
 import { ApiPut } from '../api/ApiUpdate'
 import { ApiGet } from '@/api/ApiGet'
 import { ApiGetId } from '@/api/ApiGetId'
 
-import { Cliente } from '../types/types'
+import { convertToDDMMYYYY, convertToYYYYMMDD } from '../iso/convertDate'
+
+import { Condutor } from '../types/types'
 
 import { styled } from '@mui/material/styles'
 import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid'
@@ -22,37 +24,34 @@ const Container = styled('div')({
   marginBottom: '1rem',
 })
 
-interface RowData extends Cliente {
+interface RowData extends Condutor {
   isEditMode: boolean
 }
 
-const TableListClient = () => {
+const TableListConductor = () => {
   const [rows, setRows] = useState<GridRowsProp<RowData>>([])
   const [searchId, setSearchId] = useState<string>('')
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'Id', width: 10, editable: false },
     {
-      field: 'numeroDocumento',
-      headerName: 'Número Documento',
-      width: 180,
+      field: 'numeroHabilitacao',
+      headerName: 'Número Habilitação',
+      width: 160,
     },
     {
-      field: 'tipoDocumento',
-      headerName: 'Tipo Documento',
-      width: 150,
-    },
-    { field: 'nome', headerName: 'Nome', width: 150, editable: true },
-    {
-      field: 'logradouro',
-      headerName: 'Logradouro',
-      width: 150,
+      field: 'catergoriaHabilitacao',
+      headerName: 'Categoria Habilitação',
+      width: 170,
       editable: true,
     },
-    { field: 'numero', headerName: 'Número', width: 120, editable: true },
-    { field: 'bairro', headerName: 'Bairro', width: 120, editable: true },
-    { field: 'cidade', headerName: 'Cidade', width: 120, editable: true },
-    { field: 'uf', headerName: 'UF', width: 80, editable: true },
+    { field: 'nome', headerName: 'Nome', width: 150 },
+    {
+      field: 'vencimentoHabilitacao',
+      headerName: 'Vencimento Habilitação',
+      width: 190,
+      editable: true,
+    },
     {
       field: 'actions',
       headerName: '',
@@ -72,19 +71,19 @@ const TableListClient = () => {
 
         const handleSaveClick = async () => {
           try {
-            const updatedData = {
+            const updatedData: Condutor = {
               id: rowData.id,
-              numeroDocumento: rowData.numeroDocumento,
-              tipoDocumento: rowData.tipoDocumento,
+              numeroHabilitacao: rowData.numeroHabilitacao,
+              catergoriaHabilitacao: rowData.catergoriaHabilitacao,
               nome: rowData.nome,
-              logradouro: rowData.logradouro,
-              numero: rowData.numero,
-              bairro: rowData.bairro,
-              cidade: rowData.cidade,
-              uf: rowData.uf,
+              vencimentoHabilitacao: convertToYYYYMMDD(
+                // devido ao erro na api no momento não será possivel alterar os campos
+                rowData.vencimentoHabilitacao,
+              ),
             }
+
             console.log(updatedData)
-            await ApiPut(rowData.id, '/Cliente', updatedData)
+            await ApiPut(rowData.id, '/Condutor', updatedData)
 
             setRows((prevRows) =>
               prevRows.map((row) =>
@@ -94,7 +93,7 @@ const TableListClient = () => {
               ),
             )
           } catch (error) {
-            console.error('Erro ao atualizar dados do cliente:', error)
+            console.error('Erro ao atualizar dados do condutor:', error)
           }
         }
 
@@ -131,21 +130,28 @@ const TableListClient = () => {
     },
   ]
 
+  const formatarData = (data: string): string => {
+    const dataObj = new Date(data)
+    const dia = dataObj.getDate()
+    const mes = dataObj.getMonth() + 1
+    const ano = dataObj.getFullYear()
+
+    return `${dia.toString().padStart(2, '0')}/${mes
+      .toString()
+      .padStart(2, '0')}/${ano.toString()}`
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data: Cliente[] = await ApiGet('/Cliente')
+        const data: Condutor[] = await ApiGet('/Condutor')
 
         const mappedRows: RowData[] = data.map((item) => ({
           id: item.id,
-          numeroDocumento: item.numeroDocumento || '',
-          tipoDocumento: item.tipoDocumento || '',
+          numeroHabilitacao: item.numeroHabilitacao || '',
+          catergoriaHabilitacao: item.catergoriaHabilitacao || '',
           nome: item.nome || '',
-          logradouro: item.logradouro || '',
-          numero: item.numero || '',
-          bairro: item.bairro || '',
-          cidade: item.cidade || '',
-          uf: item.uf || '',
+          vencimentoHabilitacao: convertToDDMMYYYY(item.vencimentoHabilitacao),
           isEditMode: false,
         }))
 
@@ -164,20 +170,17 @@ const TableListClient = () => {
     }
 
     try {
-      const data: Cliente | null = await ApiGetId(searchId, '/Cliente')
+      const data: Condutor | null = await ApiGetId(searchId, '/Condutor')
 
       const filteredRows = data
         ? [
             {
               id: data.id,
-              numeroDocumento: data.numeroDocumento || '',
-              tipoDocumento: data.tipoDocumento || '',
+              numeroHabilitacao: data.numeroHabilitacao || '',
+              catergoriaHabilitacao: data.catergoriaHabilitacao || '',
               nome: data.nome || '',
-              logradouro: data.logradouro || '',
-              numero: data.numero || '',
-              bairro: data.bairro || '',
-              cidade: data.cidade || '',
-              uf: data.uf || '',
+              vencimentoHabilitacao:
+                formatarData(data.vencimentoHabilitacao) || '',
               isEditMode: false,
             },
           ]
@@ -192,7 +195,7 @@ const TableListClient = () => {
   return (
     <div>
       <Container>
-        <ModalClientRegister />
+        <ModalConductorRegister />
         <SearchBar
           searchId={searchId}
           setSearchId={setSearchId}
@@ -206,4 +209,4 @@ const TableListClient = () => {
   )
 }
 
-export default TableListClient
+export default TableListConductor

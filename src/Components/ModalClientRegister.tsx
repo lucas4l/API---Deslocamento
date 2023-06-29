@@ -5,7 +5,7 @@ import Fade from '@mui/material/Fade'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
-import { postClient } from '../api/ApiPost'
+import { ApiPost } from '../api/ApiPost'
 import { Cliente } from '../types/types'
 
 const style = {
@@ -28,7 +28,7 @@ export default function ModalClientRegister() {
   const handleClose = () => setOpen(false)
 
   const handleSave = async () => {
-    await postClient(inputValues)
+    await ApiPost('Cliente', inputValues)
     handleClose()
   }
 

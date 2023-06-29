@@ -1,9 +1,14 @@
-import { Cliente } from '@/types/types'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
-export async function getClientes() {
-  const API_URL = 'https://api-deslocamento.herokuapp.com/api/v1/Cliente'
+export async function ApiGet<T>(endpoint: string): Promise<T[]> {
+  const validEndpoints = ['/Cliente', '/Condutor', '/Deslocamento', '/Veiculo']
 
-  const response = await axios.get<Cliente[]>(API_URL)
+  if (!validEndpoints.includes(endpoint)) {
+    throw new Error('Endpoint inválido')
+  }
+
+  const API_URL = `https://api-deslocamento.herokuapp.com/api/v1${endpoint}`
+
+  const response: AxiosResponse<T[]> = await axios.get(API_URL)
   return response.data
 }
