@@ -70,7 +70,7 @@ const TableListVehicle = () => {
               kmAtual: rowData.kmAtual,
             }
             console.log(updatedData)
-            await ApiPut(rowData.id, '/Veiculo', updatedData)
+            await ApiPut(rowData.id, '/Veiculo', updatedData, 'veiculo')
 
             setRows((prevRows) =>
               prevRows.map((row) =>

@@ -83,7 +83,7 @@ const TableListConductor = () => {
             }
 
             console.log(updatedData)
-            await ApiPut(rowData.id, '/Condutor', updatedData)
+            await ApiPut(rowData.id, '/Condutor', updatedData, 'condutor')
 
             setRows((prevRows) =>
               prevRows.map((row) =>

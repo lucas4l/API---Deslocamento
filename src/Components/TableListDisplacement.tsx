@@ -94,7 +94,12 @@ const TableListDisplacement = () => {
               idCliente: rowData.idCliente,
             }
             console.log(updatedData)
-            await ApiPut(rowData.id, '/Deslocamento', updatedData)
+            await ApiPut(
+              rowData.id,
+              '/Deslocamento',
+              updatedData,
+              'deslocamento',
+            )
 
             setRows((prevRows) =>
               prevRows.map((row) =>

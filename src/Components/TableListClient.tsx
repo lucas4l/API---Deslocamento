@@ -84,7 +84,7 @@ const TableListClient = () => {
               uf: rowData.uf,
             }
             console.log(updatedData)
-            await ApiPut(rowData.id, '/Cliente', updatedData)
+            await ApiPut(rowData.id, '/Cliente', updatedData, 'cliente')
 
             setRows((prevRows) =>
               prevRows.map((row) =>

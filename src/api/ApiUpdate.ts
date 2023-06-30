@@ -8,6 +8,7 @@ export async function ApiPut<T extends Resource, U extends keyof T>(
   id: number,
   endpoint: ValidEndpoint,
   updatedData: Pick<T, U>,
+  resourceType: 'cliente' | 'veiculo' | 'condutor' | 'deslocamento',
 ) {
   const validEndpoints = ['/Cliente', '/Condutor', '/Deslocamento', '/Veiculo']
 
@@ -16,7 +17,18 @@ export async function ApiPut<T extends Resource, U extends keyof T>(
   }
 
   const API_URL = `https://api-deslocamento.herokuapp.com/api/v1`
-  const url = `${API_URL}${endpoint}/${id}/EncerrarDeslocamento`
+  const API_URL_DISPLACEMENT = `https://api-deslocamento.herokuapp.com/api/v1/Deslocamento/`
+  let url = ''
+
+  if (resourceType === 'deslocamento') {
+    url = `${API_URL_DISPLACEMENT}${id}/EncerrarDeslocamento`
+  } else if (resourceType === 'cliente') {
+    url = `${API_URL}${endpoint}/${id}`
+  } else if (resourceType === 'veiculo') {
+    url = `${API_URL}${endpoint}/${id}`
+  } else if (resourceType === 'condutor') {
+    url = `${API_URL}${endpoint}/${id}`
+  }
 
   try {
     await axios.put(url, updatedData)
