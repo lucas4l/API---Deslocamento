@@ -178,9 +178,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                             </Button>
                           </Link>
                         ) : index === 2 ? (
-                          <AltRouteIcon />
+                          <Link href="/displacement">
+                            <Button>
+                              <AltRouteIcon />
+                            </Button>
+                          </Link>
                         ) : (
-                          <DirectionsCarIcon />
+                          <Link href="/vehicle">
+                            <Button>
+                              <DirectionsCarIcon />
+                            </Button>
+                          </Link>
                         )}
                       </ListItemIcon>
                       <ListItemText

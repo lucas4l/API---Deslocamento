@@ -100,10 +100,10 @@ const TableListClient = () => {
 
         const handleDeleteClick = async (id: number) => {
           try {
-            await deleteCliente(id)
+            await deleteCliente('Cliente', id)
             setRows((prevRows) => prevRows.filter((row) => row.id !== id))
           } catch (error) {
-            console.error('Erro ao excluir cliente:', error)
+            console.error(`Erro ao excluir :`, error)
           }
         }
 

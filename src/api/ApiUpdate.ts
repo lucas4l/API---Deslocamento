@@ -15,8 +15,8 @@ export async function ApiPut<T extends Resource, U extends keyof T>(
     throw new Error('Endpoint inválido')
   }
 
-  const API_URL = `https://api-deslocamento.herokuapp.com/api/v1${endpoint}`
-  const url = `${API_URL}/${id}`
+  const API_URL = `https://api-deslocamento.herokuapp.com/api/v1`
+  const url = `${API_URL}${endpoint}/${id}/EncerrarDeslocamento`
 
   try {
     await axios.put(url, updatedData)

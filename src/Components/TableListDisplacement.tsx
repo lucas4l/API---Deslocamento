@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react'
 
 import SearchBar from './SearchBar'
-import ModalConductorRegister from './ModalConductorRegister'
 import { ApiPut } from '../api/ApiUpdate'
 import { ApiGet } from '@/api/ApiGet'
 import { ApiGetId } from '@/api/ApiGetId'
 
-import { convertToDDMMYYYY, convertToYYYYMMDD } from '../iso/convertDate'
-
-import { Condutor } from '../types/types'
+import { Deslocamento } from '../types/types'
 
 import { styled } from '@mui/material/styles'
 import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid'
@@ -17,6 +14,8 @@ import EditIcon from '@mui/icons-material/Edit'
 import SaveIcon from '@mui/icons-material/Save'
 import DeleteIcon from '@mui/icons-material/DeleteOutlined'
 import { deleteCliente } from '@/api/ApiDelete'
+import ModalDeslocamentoRegister from './ModalDisplacementRegister'
+import { convertToDDMMYYYY, convertToYYYYMMDD } from '@/iso/convertDate'
 
 const Container = styled('div')({
   display: 'flex',
@@ -24,34 +23,44 @@ const Container = styled('div')({
   marginBottom: '1rem',
 })
 
-interface RowData extends Condutor {
+interface RowData extends Deslocamento {
   isEditMode: boolean
 }
 
-const TableListConductor = () => {
+const TableListDisplacement = () => {
   const [rows, setRows] = useState<GridRowsProp<RowData>>([])
   const [searchId, setSearchId] = useState<string>('')
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'Id', width: 10, editable: false },
     {
-      field: 'numeroHabilitacao',
-      headerName: 'Número Habilitação',
-      width: 160,
+      field: 'kmInicial',
+      headerName: 'Km Inicial',
+      width: 120,
+    },
+    { field: 'kmFinal', headerName: 'Km Final', width: 120, editable: true },
+    {
+      field: 'inicioDeslocamento',
+      headerName: 'Início Deslocamento',
+      width: 180,
     },
     {
-      field: 'catergoriaHabilitacao',
-      headerName: 'Categoria Habilitação',
-      width: 170,
+      field: 'fimDeslocamento',
+      headerName: 'Fim Deslocamento',
+      width: 180,
       editable: true,
     },
-    { field: 'nome', headerName: 'Nome', width: 150 },
+    { field: 'checkList', headerName: 'Check List', width: 150 },
+    { field: 'motivo', headerName: 'Motivo', width: 150 },
     {
-      field: 'vencimentoHabilitacao',
-      headerName: 'Vencimento Habilitação',
-      width: 190,
+      field: 'observacao',
+      headerName: 'Observação',
+      width: 150,
       editable: true,
     },
+    { field: 'idCondutor', headerName: 'Id Condutor', width: 120 },
+    { field: 'idVeiculo', headerName: 'Id Veículo', width: 120 },
+    { field: 'idCliente', headerName: 'Id Cliente', width: 120 },
     {
       field: 'actions',
       headerName: '',
@@ -71,19 +80,21 @@ const TableListConductor = () => {
 
         const handleSaveClick = async () => {
           try {
-            const updatedData: Condutor = {
+            const updatedData = {
               id: rowData.id,
-              numeroHabilitacao: rowData.numeroHabilitacao,
-              catergoriaHabilitacao: rowData.catergoriaHabilitacao,
-              nome: rowData.nome,
-              vencimentoHabilitacao: convertToYYYYMMDD(
-                // devido ao erro na api no momento não será possivel alterar os campos
-                rowData.vencimentoHabilitacao,
-              ),
+              kmInicial: rowData.kmInicial,
+              kmFinal: rowData.kmFinal,
+              inicioDeslocamento: rowData.inicioDeslocamento,
+              fimDeslocamento: convertToYYYYMMDD(rowData.fimDeslocamento),
+              checkList: rowData.checkList,
+              motivo: rowData.motivo,
+              observacao: rowData.observacao,
+              idCondutor: rowData.idCondutor,
+              idVeiculo: rowData.idVeiculo,
+              idCliente: rowData.idCliente,
             }
-
             console.log(updatedData)
-            await ApiPut(rowData.id, '/Condutor', updatedData)
+            await ApiPut(rowData.id, '/Deslocamento', updatedData)
 
             setRows((prevRows) =>
               prevRows.map((row) =>
@@ -93,16 +104,16 @@ const TableListConductor = () => {
               ),
             )
           } catch (error) {
-            console.error('Erro ao atualizar dados do condutor:', error)
+            console.error('Erro ao atualizar dados do deslocamento:', error)
           }
         }
 
         const handleDeleteClick = async (id: number) => {
           try {
-            await deleteCliente('COndutor', id)
+            await deleteCliente('Deslocamento', id)
             setRows((prevRows) => prevRows.filter((row) => row.id !== id))
           } catch (error) {
-            console.error('Erro ao excluir cliente:', error)
+            console.error('Erro ao excluir deslocamento:', error)
           }
         }
 
@@ -130,28 +141,23 @@ const TableListConductor = () => {
     },
   ]
 
-  const formatarData = (data: string): string => {
-    const dataObj = new Date(data)
-    const dia = dataObj.getDate()
-    const mes = dataObj.getMonth() + 1
-    const ano = dataObj.getFullYear()
-
-    return `${dia.toString().padStart(2, '0')}/${mes
-      .toString()
-      .padStart(2, '0')}/${ano.toString()}`
-  }
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data: Condutor[] = await ApiGet('/Condutor')
+        const data: Deslocamento[] = await ApiGet('/Deslocamento')
 
         const mappedRows: RowData[] = data.map((item) => ({
           id: item.id,
-          numeroHabilitacao: item.numeroHabilitacao || '',
-          catergoriaHabilitacao: item.catergoriaHabilitacao || '',
-          nome: item.nome || '',
-          vencimentoHabilitacao: convertToDDMMYYYY(item.vencimentoHabilitacao),
+          kmInicial: item.kmInicial,
+          kmFinal: item.kmFinal,
+          inicioDeslocamento: convertToDDMMYYYY(item.inicioDeslocamento) || '',
+          fimDeslocamento: convertToDDMMYYYY(item.fimDeslocamento) || '',
+          checkList: item.checkList || '',
+          motivo: item.motivo || '',
+          observacao: item.observacao || '',
+          idCondutor: item.idCondutor,
+          idVeiculo: item.idVeiculo,
+          idCliente: item.idCliente,
           isEditMode: false,
         }))
 
@@ -170,17 +176,25 @@ const TableListConductor = () => {
     }
 
     try {
-      const data: Condutor | null = await ApiGetId(searchId, '/Condutor')
+      const data: Deslocamento | null = await ApiGetId(
+        searchId,
+        '/Deslocamento',
+      )
 
       const filteredRows = data
         ? [
             {
               id: data.id,
-              numeroHabilitacao: data.numeroHabilitacao || '',
-              catergoriaHabilitacao: data.catergoriaHabilitacao || '',
-              nome: data.nome || '',
-              vencimentoHabilitacao:
-                formatarData(data.vencimentoHabilitacao) || '',
+              kmInicial: data.kmInicial,
+              kmFinal: data.kmFinal,
+              inicioDeslocamento: data.inicioDeslocamento || '',
+              fimDeslocamento: data.fimDeslocamento || '',
+              checkList: data.checkList || '',
+              motivo: data.motivo || '',
+              observacao: data.observacao || '',
+              idCondutor: data.idCondutor,
+              idVeiculo: data.idVeiculo,
+              idCliente: data.idCliente,
               isEditMode: false,
             },
           ]
@@ -195,7 +209,7 @@ const TableListConductor = () => {
   return (
     <div>
       <Container>
-        <ModalConductorRegister />
+        <ModalDeslocamentoRegister />
         <SearchBar
           searchId={searchId}
           setSearchId={setSearchId}
@@ -209,4 +223,4 @@ const TableListConductor = () => {
   )
 }
 
-export default TableListConductor
+export default TableListDisplacement

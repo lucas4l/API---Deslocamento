@@ -1,8 +1,12 @@
 import axios from 'axios'
 
-export const deleteCliente = async (id: number) => {
-  const API_URL = 'https://api-deslocamento.herokuapp.com/api/v1/Cliente'
-  const url = `${API_URL}/${id}`
+export const deleteCliente = async (
+  entity: string,
+  id: number,
+): Promise<void> => {
+  const API_URL = 'https://api-deslocamento.herokuapp.com/api/v1'
+  const url = `${API_URL}/${entity}/${id}`
+
   try {
     const response = await axios.delete(url, {
       headers: {

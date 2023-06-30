@@ -46,7 +46,7 @@ export default function ModalConductorRegister() {
 
   return (
     <div>
-      <Button onClick={handleOpen}>Adicionar Cliente</Button>
+      <Button onClick={handleOpen}>Adicionar Condutor</Button>
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"

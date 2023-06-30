@@ -18,6 +18,9 @@ const style = {
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
 }
 
 export default function ModalClientRegister() {

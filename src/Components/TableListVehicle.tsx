@@ -1,22 +1,17 @@
 import React, { useEffect, useState } from 'react'
-
 import SearchBar from './SearchBar'
-import ModalConductorRegister from './ModalConductorRegister'
 import { ApiPut } from '../api/ApiUpdate'
 import { ApiGet } from '@/api/ApiGet'
 import { ApiGetId } from '@/api/ApiGetId'
-
-import { convertToDDMMYYYY, convertToYYYYMMDD } from '../iso/convertDate'
-
-import { Condutor } from '../types/types'
-
+import { deleteCliente } from '@/api/ApiDelete'
+import { Veiculo } from '../types/types'
 import { styled } from '@mui/material/styles'
 import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid'
 import { IconButton } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
 import SaveIcon from '@mui/icons-material/Save'
 import DeleteIcon from '@mui/icons-material/DeleteOutlined'
-import { deleteCliente } from '@/api/ApiDelete'
+import ModalVeiculoRegister from './ModalVehicleRegister'
 
 const Container = styled('div')({
   display: 'flex',
@@ -24,34 +19,30 @@ const Container = styled('div')({
   marginBottom: '1rem',
 })
 
-interface RowData extends Condutor {
+interface RowData extends Veiculo {
   isEditMode: boolean
 }
 
-const TableListConductor = () => {
+const TableListVehicle = () => {
   const [rows, setRows] = useState<GridRowsProp<RowData>>([])
   const [searchId, setSearchId] = useState<string>('')
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'Id', width: 10, editable: false },
+    { field: 'placa', headerName: 'Placa', width: 150 },
     {
-      field: 'numeroHabilitacao',
-      headerName: 'Número Habilitação',
-      width: 160,
-    },
-    {
-      field: 'catergoriaHabilitacao',
-      headerName: 'Categoria Habilitação',
-      width: 170,
+      field: 'marcaModelo',
+      headerName: 'Marca/Modelo',
+      width: 180,
       editable: true,
     },
-    { field: 'nome', headerName: 'Nome', width: 150 },
     {
-      field: 'vencimentoHabilitacao',
-      headerName: 'Vencimento Habilitação',
-      width: 190,
+      field: 'anoFabricacao',
+      headerName: 'Ano de Fabricação',
+      width: 180,
       editable: true,
     },
+    { field: 'kmAtual', headerName: 'KM Atual', width: 150, editable: true },
     {
       field: 'actions',
       headerName: '',
@@ -71,19 +62,15 @@ const TableListConductor = () => {
 
         const handleSaveClick = async () => {
           try {
-            const updatedData: Condutor = {
+            const updatedData: Veiculo = {
               id: rowData.id,
-              numeroHabilitacao: rowData.numeroHabilitacao,
-              catergoriaHabilitacao: rowData.catergoriaHabilitacao,
-              nome: rowData.nome,
-              vencimentoHabilitacao: convertToYYYYMMDD(
-                // devido ao erro na api no momento não será possivel alterar os campos
-                rowData.vencimentoHabilitacao,
-              ),
+              placa: rowData.placa,
+              marcaModelo: rowData.marcaModelo,
+              anoFabricacao: rowData.anoFabricacao,
+              kmAtual: rowData.kmAtual,
             }
-
             console.log(updatedData)
-            await ApiPut(rowData.id, '/Condutor', updatedData)
+            await ApiPut(rowData.id, '/Veiculo', updatedData)
 
             setRows((prevRows) =>
               prevRows.map((row) =>
@@ -93,16 +80,16 @@ const TableListConductor = () => {
               ),
             )
           } catch (error) {
-            console.error('Erro ao atualizar dados do condutor:', error)
+            console.error('Erro ao atualizar dados do veículo:', error)
           }
         }
 
         const handleDeleteClick = async (id: number) => {
           try {
-            await deleteCliente('COndutor', id)
+            await deleteCliente('Veiculo', id)
             setRows((prevRows) => prevRows.filter((row) => row.id !== id))
           } catch (error) {
-            console.error('Erro ao excluir cliente:', error)
+            console.error('Erro ao excluir veículo:', error)
           }
         }
 
@@ -130,28 +117,17 @@ const TableListConductor = () => {
     },
   ]
 
-  const formatarData = (data: string): string => {
-    const dataObj = new Date(data)
-    const dia = dataObj.getDate()
-    const mes = dataObj.getMonth() + 1
-    const ano = dataObj.getFullYear()
-
-    return `${dia.toString().padStart(2, '0')}/${mes
-      .toString()
-      .padStart(2, '0')}/${ano.toString()}`
-  }
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data: Condutor[] = await ApiGet('/Condutor')
+        const data: Veiculo[] = await ApiGet('/Veiculo')
 
         const mappedRows: RowData[] = data.map((item) => ({
           id: item.id,
-          numeroHabilitacao: item.numeroHabilitacao || '',
-          catergoriaHabilitacao: item.catergoriaHabilitacao || '',
-          nome: item.nome || '',
-          vencimentoHabilitacao: convertToDDMMYYYY(item.vencimentoHabilitacao),
+          placa: item.placa || '',
+          marcaModelo: item.marcaModelo || '',
+          anoFabricacao: item.anoFabricacao || 0,
+          kmAtual: item.kmAtual || 0,
           isEditMode: false,
         }))
 
@@ -170,17 +146,16 @@ const TableListConductor = () => {
     }
 
     try {
-      const data: Condutor | null = await ApiGetId(searchId, '/Condutor')
+      const data: Veiculo | null = await ApiGetId(searchId, '/Veiculo')
 
       const filteredRows = data
         ? [
             {
               id: data.id,
-              numeroHabilitacao: data.numeroHabilitacao || '',
-              catergoriaHabilitacao: data.catergoriaHabilitacao || '',
-              nome: data.nome || '',
-              vencimentoHabilitacao:
-                formatarData(data.vencimentoHabilitacao) || '',
+              placa: data.placa || '',
+              marcaModelo: data.marcaModelo || '',
+              anoFabricacao: data.anoFabricacao || 0,
+              kmAtual: data.kmAtual || 0,
               isEditMode: false,
             },
           ]
@@ -195,7 +170,7 @@ const TableListConductor = () => {
   return (
     <div>
       <Container>
-        <ModalConductorRegister />
+        <ModalVeiculoRegister />
         <SearchBar
           searchId={searchId}
           setSearchId={setSearchId}
@@ -209,4 +184,4 @@ const TableListConductor = () => {
   )
 }
 
-export default TableListConductor
+export default TableListVehicle
